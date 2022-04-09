@@ -1,76 +1,66 @@
-//Add user details here
-
-import React, { useState } from 'react';
+//This is an Alt hook that is useRef
+ 
+import React, { useState, useRef } from 'react';
 
 import Card from '../UI/Card';
 import Button from '../UI/Button';
 import ErrorModal from '../UI/ErrorModal';
-import styles from './AddUser.module.css';
 import Wrapper from '../Helpers/Wrapper';
+import classes from './AddUser.module.css';
 
 const AddUser = (props) => {
-  const [enteredUsername, setEnteredUsername] = useState('');
-  const [enteredAge, setEnteredAge] = useState('');
-  const [oriError, setError] = useState();
+  const nameInputRef = useRef();
+  const ageInputRef = useRef();
+
+  const [error, setError] = useState();
 
   const addUserHandler = (event) => {
     event.preventDefault();
-    if (enteredUsername.trim().length === 0 || enteredAge.trim().length === 0) {
+    const enteredName = nameInputRef.current.value;
+    const enteredUserAge = ageInputRef.current.value;
+    if (enteredName.trim().length === 0 || enteredUserAge.trim().length === 0) {
       setError({
-        title:"Invalid Input",
-        message:"Please enter a valid name"
-      })
+        title: 'Invalid input',
+        message: 'Please enter a valid name and age (non-empty values).',
+      });
       return;
     }
-//enteredAge is a string coz acc to JS and Dom anything that is entereed is considered as string since we are comparing it with a number so to be super safe,
-//we force a conversion by adding + to convert it into number
-    if (+enteredAge < 1) {
+    if (+enteredUserAge < 1) {
       setError({
-        title:"Invalid age", 
-        message:"Please enter a valid age"
-      })
+        title: 'Invalid age',
+        message: 'Please enter a valid age (> 0).',
+      });
       return;
     }
-    props.onAddUser(enteredUsername, enteredAge);
-    setEnteredUsername('');
-    setEnteredAge('');
-  };
-
-  const usernameChangeHandler = (event) => {
-    setEnteredUsername(event.target.value);
-  };
-
-  const ageChangeHandler = (event) => {
-    setEnteredAge(event.target.value);
+    props.onAddUser(enteredName, enteredUserAge);
+    nameInputRef.current.value = '';
+    ageInputRef.current.value = '';
   };
 
   const errorHandler = () => {
     setError(null);
   };
 
-//ErrorModal will only be output if we have a error.
+//If we acces values with Ref specifically <input> then we can call it as Uncontrolled Components.
+
   return (
     <Wrapper>
-      {oriError && <ErrorModal title={oriError.title} message={oriError.message} onConfirm={errorHandler}/>}
-    <Card className={styles.input}>
-      <form onSubmit={addUserHandler}>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={enteredUsername}
-          onChange={usernameChangeHandler}
+      {error && (
+        <ErrorModal
+          title={error.title}
+          message={error.message}
+          onConfirm={errorHandler}
         />
-        <label htmlFor="age">Age (Years)</label>
-        <input
-          id="age"
-          type="number"
-          value={enteredAge}
-          onChange={ageChangeHandler}
-        />
-        <Button type="submit">Add User</Button>
-      </form>
-    </Card>
+      )}
+      <Card className={classes.input}>
+        <form onSubmit={addUserHandler}>
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" ref={nameInputRef} />
+          <label htmlFor="age">Age (Years)</label>
+          <input id="age" type="number" ref={ageInputRef} />
+          <Button type="submit">Add User</Button>
+        </form>
+      </Card>
     </Wrapper>
   );
 };
