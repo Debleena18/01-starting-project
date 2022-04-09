@@ -10,15 +10,24 @@ import styles from './AddUser.module.css';
 const AddUser = (props) => {
   const [enteredUsername, setEnteredUsername] = useState('');
   const [enteredAge, setEnteredAge] = useState('');
+  const [oriError, setError] = useState();
 
   const addUserHandler = (event) => {
     event.preventDefault();
     if (enteredUsername.trim().length === 0 || enteredAge.trim().length === 0) {
+      setError({
+        title:"Invalid Input",
+        message:"Please enter a valid name"
+      })
       return;
     }
 //enteredAge is a string coz acc to JS and Dom anything that is entereed is considered as string since we are comparing it with a number so to be super safe,
 //we force a conversion by adding + to convert it into number
     if (+enteredAge < 1) {
+      setError({
+        title:"Invalid age", 
+        message:"Please enter a valid age"
+      })
       return;
     }
     props.onAddUser(enteredUsername, enteredAge);
@@ -34,9 +43,14 @@ const AddUser = (props) => {
     setEnteredAge(event.target.value);
   };
 
+  const errorHandler = () => {
+    setError(null);
+  };
+
+//ErrorModal will only be output if we have a error.
   return (
     <div>
-      <ErrorModal title="An error occured!" message="Something went wrong!" />
+      {oriError && <ErrorModal title={oriError.title} message={oriError.message} onConfirm={errorHandler}/>}
     <Card className={styles.input}>
       <form onSubmit={addUserHandler}>
         <label htmlFor="username">Username</label>
